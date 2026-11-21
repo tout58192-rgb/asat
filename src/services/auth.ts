@@ -4,20 +4,11 @@ export interface AdminUser {
   id: string;
   email: string | null;
   role: 'admin';
-  isDemo?: boolean;
 }
-
-const DEMO_SESSION_KEY = 'asatek_demo_admin';
 
 export async function getCurrentAdmin(): Promise<AdminUser | null> {
   if (!isSupabaseConfigured || !supabase) {
-    const raw = localStorage.getItem(DEMO_SESSION_KEY);
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw) as AdminUser;
-    } catch {
-      return null;
-    }
+    return null;
   }
 
   const {
@@ -49,14 +40,9 @@ export async function signInAdmin(
   password: string,
 ): Promise<AdminUser> {
   if (!isSupabaseConfigured || !supabase) {
-    const demoUser: AdminUser = {
-      id: 'demo-admin',
-      email: email.trim() || 'admin@asatekpower.pk',
-      role: 'admin',
-      isDemo: true,
-    };
-    localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(demoUser));
-    return demoUser;
+    throw new Error(
+      'Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+    );
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -87,7 +73,6 @@ export async function signInAdmin(
 
 export async function signOutAdmin(): Promise<void> {
   if (!isSupabaseConfigured || !supabase) {
-    localStorage.removeItem(DEMO_SESSION_KEY);
     return;
   }
   await supabase.auth.signOut();

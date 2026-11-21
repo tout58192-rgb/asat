@@ -38,7 +38,7 @@
     "previous": "پچھلا",
     "next": "اگلا",
     "pageOf": "صفحہ {page} از {total}",
-    "demoBanner": "پری ویو موڈ: نمونہ ڈیٹا استعمال ہو رہا ہے (لائیو ڈیٹا بیس کے لیے Supabase کی تفصیلات شامل کریں)۔",
+    "demoBanner": "Supabase کنفیگر نہیں ہے — پری ویو کے لیے نمونہ ڈیٹا دکھایا جا رہا ہے۔ لائیو ڈیٹا بیس جوڑنے کے لیے VITE_SUPABASE_URL اور VITE_SUPABASE_ANON_KEY شامل کریں۔",
     "configMissingTitle": "کنفیگریشن موجود نہیں",
     "configMissingBody": "VITE_SUPABASE_URL اور VITE_SUPABASE_ANON_KEY سیٹ نہیں ہیں۔"
   },

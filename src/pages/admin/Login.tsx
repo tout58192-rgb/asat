@@ -12,12 +12,8 @@ export default function AdminLogin() {
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from || '/admin';
 
-  const [email, setEmail] = useState(
-    !isSupabaseConfigured ? 'admin@asatekpower.pk' : '',
-  );
-  const [password, setPassword] = useState(
-    !isSupabaseConfigured ? 'demo-password' : '',
-  );
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,6 +37,12 @@ export default function AdminLogin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!isSupabaseConfigured) {
+      setError(
+        'Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+      );
+      return;
+    }
     if (!email.trim() || !password) {
       setError('Please enter your admin email and password.');
       return;
@@ -68,13 +70,13 @@ export default function AdminLogin() {
             ASATEK Admin Portal
           </h1>
           <p className="text-sm text-[var(--ink-soft)]">
-            Sign in to manage products, wholesale slabs, orders, and settings.
+            Sign in with your Supabase Auth admin account to manage products, wholesale slabs, orders, and settings.
           </p>
         </div>
 
         {!isSupabaseConfigured && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-[var(--warn)]">
-            Demo mode: Supabase env vars are absent. Click Sign In to explore the admin panel with in-memory data.
+            Supabase not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then sign in with an account that has role = &apos;admin&apos; in the profiles table.
           </div>
         )}
 
@@ -83,15 +85,17 @@ export default function AdminLogin() {
             label="Admin Email"
             type="email"
             required
+            disabled={!isSupabaseConfigured}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="owner@asatekpower.pk"
+            placeholder="Enter your Supabase email"
           />
 
           <Input
             label="Password"
             type="password"
             required
+            disabled={!isSupabaseConfigured}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -107,6 +111,7 @@ export default function AdminLogin() {
             type="submit"
             variant="primary"
             size="lg"
+            disabled={!isSupabaseConfigured}
             loading={submitting}
             className="w-full"
           >
