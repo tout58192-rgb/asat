@@ -35,13 +35,13 @@ npm install
 npm run dev
 ```
 
-## Production Build & Cloudflare Pages
+## Production Build & Cloudflare Workers / Pages
 
 ```bash
 npm run build
 ```
 
 - Build output directory: `dist`
-- `public/_redirects` handles SPA fallback (`/* /index.html 200`)
+- `wrangler.jsonc` configures Cloudflare Workers static assets with `"not_found_handling": "single-page-application"` for SPA routing (without a looping `_redirects` file)
 - `.npmrc` sets `legacy-peer-deps=true`
 - Recommended Node version: 20 (`NODE_VERSION=20`)
