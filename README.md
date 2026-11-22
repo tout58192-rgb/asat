@@ -17,16 +17,17 @@ B2B wholesale catalogue, quantity-slab pricing portal, dual-channel order system
   - Settings page with live-validated **WhatsApp Order Number** card that updates all WhatsApp links site-wide
 - **Preview / Mock Mode**: Automatically runs on built-in sample data when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are not set.
 
-## Environment Variables
+## Environment variables
 
-Copy `.env.example` to `.env` and fill in your Supabase project credentials:
+Copy `.env.example` to `.env` and fill in your Supabase project credentials from **Supabase → Project Settings → API Keys**:
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_SUPABASE_URL` | Supabase Project URL (Project Settings → API) |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon / publishable key (safe for browser; RLS enforced) |
+| `VITE_SUPABASE_URL` | Supabase Project URL |
+| `VITE_SUPABASE_ANON_KEY` | Public `sb_publishable_...` (or legacy `anon`) key |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Optional fallback public `sb_publishable_...` key used when `VITE_SUPABASE_ANON_KEY` is empty |
 
-> **Security Note**: Never place `SUPABASE_SERVICE_ROLE_KEY` in frontend code or `.env`.
+> **Security Note**: Never place `sb_secret_...` or `service_role` keys in frontend environment variables or `.env`.
 
 ## Local Development
 

@@ -33,22 +33,44 @@ export default defineConfig(({command, mode}) => {
       env.VITE_SUPABASE_URL ??
       ''
     ).trim();
-    const supabaseAnonKey = (
+    const anonKey = (
       process.env.VITE_SUPABASE_ANON_KEY ??
       env.VITE_SUPABASE_ANON_KEY ??
       ''
     ).trim();
+    const publishableKey = (
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+      env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+      ''
+    ).trim();
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (anonKey && isServiceRoleKey(anonKey)) {
+      throw new Error(
+        '[ASATEK build] VITE_SUPABASE_ANON_KEY contains a secret/service_role key. ' +
+          'Paste the "sb_publishable_..." key from Supabase -> Project Settings -> API Keys.',
+      );
+    }
+
+    if (publishableKey && isServiceRoleKey(publishableKey)) {
+      throw new Error(
+        '[ASATEK build] VITE_SUPABASE_PUBLISHABLE_KEY contains a secret/service_role key. ' +
+          'Paste the "sb_publishable_..." key from Supabase -> Project Settings -> API Keys.',
+      );
+    }
+
+    const resolvedKey = anonKey || publishableKey;
+
+    if (!supabaseUrl || !resolvedKey) {
       const missing = [
         !supabaseUrl ? 'VITE_SUPABASE_URL' : null,
-        !supabaseAnonKey ? 'VITE_SUPABASE_ANON_KEY' : null,
+        !resolvedKey
+          ? 'VITE_SUPABASE_ANON_KEY (or VITE_SUPABASE_PUBLISHABLE_KEY)'
+          : null,
       ]
         .filter(Boolean)
         .join(', ');
       throw new Error(
-        `[ASATEK build] Missing required Supabase environment variable(s): ${missing}. ` +
-          'Set both VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY before running "npm run build".',
+        `[ASATEK build] Missing required Supabase environment variable(s): ${missing}.`,
       );
     }
 
@@ -57,20 +79,7 @@ export default defineConfig(({command, mode}) => {
       !supabaseUrl.startsWith('http://')
     ) {
       throw new Error(
-        `[ASATEK build] Invalid VITE_SUPABASE_URL "${supabaseUrl}". Must start with https:// or http://.`,
-      );
-    }
-
-    if (isServiceRoleKey(supabaseAnonKey)) {
-      const source = process.env.VITE_SUPABASE_ANON_KEY
-        ? 'build environment variable'
-        : '.env file';
-      const keyKind = supabaseAnonKey.startsWith('sb_secret_')
-        ? 'sb_secret_* key'
-        : 'JWT with role="service_role"';
-      throw new Error(
-        `[ASATEK build] Refusing to bundle a Supabase service-role/secret key (${keyKind} from ${source}) into frontend code. ` +
-          'Replace VITE_SUPABASE_ANON_KEY in Cloudflare Workers Build Variables / GitHub Secrets / .env with the public Publishable / anon key (sb_publishable_...).',
+        '[ASATEK build] VITE_SUPABASE_URL must start with https:// or http://.',
       );
     }
   }
