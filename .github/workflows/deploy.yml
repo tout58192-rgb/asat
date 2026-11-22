@@ -30,6 +30,14 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://sihdukiyucmvbtfbacjv.supabase.co' }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_xqdVmMt3jzbkFEVhhTAnQQ_CDYV3RD3' }}
 
+      - name: Verify embedded Supabase config in dist
+        run: |
+          grep -rqF "$VITE_SUPABASE_URL" dist/assets/*.js
+          grep -rqF "$VITE_SUPABASE_ANON_KEY" dist/assets/*.js
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://sihdukiyucmvbtfbacjv.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || vars.VITE_SUPABASE_ANON_KEY || 'sb_publishable_xqdVmMt3jzbkFEVhhTAnQQ_CDYV3RD3' }}
+
       - name: Deploy
         run: npx wrangler@4 deploy
         env:

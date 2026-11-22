@@ -3,11 +3,71 @@ import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
-import {defineConfig} from 'vite';
+import {defineConfig, loadEnv} from 'vite';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(() => {
+function isServiceRoleKey(key: string): boolean {
+  if (key.startsWith('sb_secret_')) return true;
+  const parts = key.split('.');
+  if (parts.length === 3) {
+    try {
+      const payload = JSON.parse(
+        Buffer.from(parts[1], 'base64url').toString('utf8'),
+      );
+      if (payload && payload.role === 'service_role') {
+        return true;
+      }
+    } catch {
+      // Not a JWT; ignore
+    }
+  }
+  return false;
+}
+
+export default defineConfig(({command, mode}) => {
+  if (command === 'build') {
+    const env = loadEnv(mode, rootDir, 'VITE_');
+    const supabaseUrl = (
+      process.env.VITE_SUPABASE_URL ??
+      env.VITE_SUPABASE_URL ??
+      ''
+    ).trim();
+    const supabaseAnonKey = (
+      process.env.VITE_SUPABASE_ANON_KEY ??
+      env.VITE_SUPABASE_ANON_KEY ??
+      ''
+    ).trim();
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      const missing = [
+        !supabaseUrl ? 'VITE_SUPABASE_URL' : null,
+        !supabaseAnonKey ? 'VITE_SUPABASE_ANON_KEY' : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      throw new Error(
+        `[ASATEK build] Missing required Supabase environment variable(s): ${missing}. ` +
+          'Set both VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY before running "npm run build".',
+      );
+    }
+
+    if (
+      !supabaseUrl.startsWith('https://') &&
+      !supabaseUrl.startsWith('http://')
+    ) {
+      throw new Error(
+        `[ASATEK build] Invalid VITE_SUPABASE_URL "${supabaseUrl}". Must start with https:// or http://.`,
+      );
+    }
+
+    if (isServiceRoleKey(supabaseAnonKey)) {
+      throw new Error(
+        '[ASATEK build] Refusing to bundle a Supabase service-role/secret key into frontend code. Use the public anon/publishable key for VITE_SUPABASE_ANON_KEY.',
+      );
+    }
+  }
+
   return {
     plugins: [
       react(),
