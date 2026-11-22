@@ -62,8 +62,15 @@ export default defineConfig(({command, mode}) => {
     }
 
     if (isServiceRoleKey(supabaseAnonKey)) {
+      const source = process.env.VITE_SUPABASE_ANON_KEY
+        ? 'build environment variable'
+        : '.env file';
+      const keyKind = supabaseAnonKey.startsWith('sb_secret_')
+        ? 'sb_secret_* key'
+        : 'JWT with role="service_role"';
       throw new Error(
-        '[ASATEK build] Refusing to bundle a Supabase service-role/secret key into frontend code. Use the public anon/publishable key for VITE_SUPABASE_ANON_KEY.',
+        `[ASATEK build] Refusing to bundle a Supabase service-role/secret key (${keyKind} from ${source}) into frontend code. ` +
+          'Replace VITE_SUPABASE_ANON_KEY in Cloudflare Workers Build Variables / GitHub Secrets / .env with the public Publishable / anon key (sb_publishable_...).',
       );
     }
   }
