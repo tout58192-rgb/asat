@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import {
   getCurrentAdmin,
   signInAdmin,
@@ -28,8 +29,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => {
         if (active) setLoading(false);
       });
+
+    const subscription =
+      isSupabaseConfigured && supabase
+        ? supabase.auth.onAuthStateChange((event) => {
+            if (event === 'SIGNED_OUT' && active) {
+              setAdmin(null);
+            }
+          }).data.subscription
+        : null;
+
     return () => {
       active = false;
+      subscription?.unsubscribe();
     };
   }, []);
 

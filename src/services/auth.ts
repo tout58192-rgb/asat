@@ -59,7 +59,12 @@ export async function signInAdmin(
     .eq('id', data.user.id)
     .maybeSingle();
 
-  if (profileError || !profile || profile.role !== 'admin') {
+  if (profileError) {
+    await supabase.auth.signOut();
+    throw new Error(profileError.message || 'Failed to verify admin profile');
+  }
+
+  if (!profile || profile.role !== 'admin') {
     await supabase.auth.signOut();
     throw new Error('Not authorised');
   }
